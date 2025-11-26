@@ -1,5 +1,5 @@
 # Ignorar compilados y objetos
-build/
+# build/
 *.o
 
 # Ignorar configuraciones de editor
