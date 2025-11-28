@@ -117,7 +117,6 @@ else
     echo "      Recuerda copiarlo manualmente a: $MEDNAFEN_DIR/"
 fi
 
-# ... (resto del script) ...
 
 # 8. CREAR CARPETAS DE DATOS
 #mkdir -p roms/nes roms/snes roms/gba data
