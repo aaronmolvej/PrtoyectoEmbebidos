@@ -89,8 +89,38 @@ else
     echo "   -> cmdline.txt actualizado correctamente."
 fi
 
+# 9. INSTALACIÓN DE BIOS (Si está presente)
+echo ">>> [8/X] Verificando BIOS de GBA..."
+
+# Definir rutas
+MEDNAFEN_DIR="/home/$SUDO_USER/.mednafen"
+BIOS_FILE="gba_bios.bin"
+
+# Asegurar que la carpeta de destino exista y tenga permisos
+mkdir -p "$MEDNAFEN_DIR"
+chown $SUDO_USER:$SUDO_USER "$MEDNAFEN_DIR"
+
+# Verificar si el archivo existe en la carpeta del proyecto
+if [ -f "$BIOS_FILE" ]; then
+    echo "   -> Archivo '$BIOS_FILE' encontrado. Instalando..."
+    
+    # Copiar el archivo
+    cp "$BIOS_FILE" "$MEDNAFEN_DIR/"
+    
+    # Ajustar permisos (Lectura para todos, Dueño: usuario pi)
+    chmod 644 "$MEDNAFEN_DIR/$BIOS_FILE"
+    chown $SUDO_USER:$SUDO_USER "$MEDNAFEN_DIR/$BIOS_FILE"
+    
+    echo "   -> BIOS instalada correctamente."
+else
+    echo "   -> ADVERTENCIA: No se encontró '$BIOS_FILE' en esta carpeta."
+    echo "      Recuerda copiarlo manualmente a: $MEDNAFEN_DIR/"
+fi
+
+# ... (resto del script) ...
+
 # 8. CREAR CARPETAS DE DATOS
-mkdir -p roms/nes roms/snes roms/gba data
+#mkdir -p roms/nes roms/snes roms/gba data
 # Asegurar que el usuario sea dueño de todo
 sudo chown -R $SUDO_USER:$SUDO_USER .
 
