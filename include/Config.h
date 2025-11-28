@@ -42,10 +42,10 @@ enum class Tab {
 };
 
 
-const std::string ROM_PATH_USB = "/media/";
-const std::string ROM_PATH_NES = "/media/nes/"; 
-const std::string ROM_PATH_SNES = "/media/snes/";
-const std::string ROM_PATH_GBA = "/media/gba/";
+const std::string ROM_PATH_USB = "/media/usb_drive/";
+const std::string ROM_PATH_NES = "/media/usb_drive/nes/"; 
+const std::string ROM_PATH_SNES = "/media/usb_drive/snes/";
+const std::string ROM_PATH_GBA = "/media/usb_drive/gba/";
 
 const std::string ROM_PATH = "roms/";
 const std::string LOCAL_ROM_PATH = "/home/pi/proyecto_final/roms/";

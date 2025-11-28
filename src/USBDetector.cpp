@@ -60,17 +60,14 @@ void USBDetector::scanWindowsDrives() {
 #else
 void USBDetector::scanLinuxDrives() {
     usbPaths.clear();
-    std::string mediaPath = "/media/";
-    
+
+    std::string mediaPath = "/media/usb_drive/";
+
+    // Verificamos si existe la carpeta
     if (fs::exists(mediaPath) && fs::is_directory(mediaPath)) {
-        for (const auto& entry : fs::directory_iterator(mediaPath)) {
-            if (fs::is_directory(entry.status())) {
-                std::string pathName = entry.path().filename().string();
-                // Filtro simple para detectar montajes de usbmount
-                if (pathName.find("usb") != std::string::npos) {
-                     usbPaths.push_back(entry.path().string() + "/");
-                }
-            }
+        if (!fs::is_empty(mediaPath)) {
+             usbPaths.push_back(mediaPath);
+             std::cout << "USB detectada en: " << mediaPath << std::endl;
         }
     }
 }

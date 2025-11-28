@@ -388,7 +388,16 @@ void MenuScreen::onEnter() {
     updateDisplayedROMs();
     tabButtons[0]->setSelected(true);
     consoleButtons[0]->setSelected(true);
-    updateButtonStates();
+    if (fs::exists("/tmp/usb_inserted_flag")) {
+        fs::remove("/tmp/usb_inserted_flag");
+
+        currentTab = Tab::ROMS;
+
+        checkAndCopyUSBROMs(nullptr);
+
+        updateDisplayedROMs();
+        updateButtonStates();
+    }
 }
 
 void MenuScreen::updateDisplayedROMs() {
@@ -567,29 +576,10 @@ void MenuScreen::handleInput(InputManager& input) {
             btnContinue->click();
     }
 
-    if (currentTab == Tab::ROMS) {
-        if (input.isUpPressed() && !availableForAdd.empty())
-            selectedFileIndex = (selectedFileIndex - 1 + availableForAdd.size()) % availableForAdd.size();
-
-        if (input.isDownPressed() && !availableForAdd.empty())
-            selectedFileIndex = (selectedFileIndex + 1) % availableForAdd.size();
-
-        if ((input.isConfirmPressed() || input.isGamepadButtonPressed(SDL_CONTROLLER_BUTTON_A)) && !availableForAdd.empty())
-            addROMFromPath(availableForAdd[selectedFileIndex]);
-
-        if (input.isKeyPressed(SDLK_r) || input.isGamepadButtonPressed(SDL_CONTROLLER_BUTTON_BACK)) {
-            if (!usbCheckInProgress) {
-                checkAndCopyUSBROMs(nullptr);
-            }
-        }
-        
-        if (input.isKeyPressed(SDLK_DELETE) || input.isGamepadButtonPressed(SDL_CONTROLLER_BUTTON_Y))
-            btnDeleteROM->click();
-    }
 
     int mx = input.getMouseX();
     int my = input.getMouseY();
-    
+
     for(auto btn : tabButtons) { 
         btn->update(mx,my); 
         if (input.isMouseButtonPressed(SDL_BUTTON_LEFT) && btn->isClicked(mx, my)) btn->click(); 
@@ -615,11 +605,38 @@ void MenuScreen::handleInput(InputManager& input) {
         btnAddROM->update(mx,my);
         btnDeleteROM->update(mx,my);
         btnRescan->update(mx,my);
-        
+
         if (input.isMouseButtonPressed(SDL_BUTTON_LEFT)){
             if (btnAddROM->isClicked(mx,my)) btnAddROM->click();
             if (btnDeleteROM->isClicked(mx,my)) btnDeleteROM->click();
             if (btnRescan->isClicked(mx,my)) btnRescan->click();
+        }
+
+        if (!availableForAdd.empty()) {
+            if (input.isUpPressed()) {
+                selectedFileIndex = (selectedFileIndex - 1 + availableForAdd.size()) % availableForAdd.size();
+            }
+            if (input.isDownPressed()) {
+                selectedFileIndex = (selectedFileIndex + 1) % availableForAdd.size();
+            }
+
+            if (input.isConfirmPressed()) {
+                btnAddROM->click();
+                copyROMFromUSBToLocal(nullptr, availableForAdd[selectedFileIndex]);
+                updateDisplayedROMs();
+            }
+        }
+
+        if (input.isKeyPressed(SDLK_DELETE) || input.isGamepadButtonPressed(SDL_CONTROLLER_BUTTON_Y)) {
+            btnDeleteROM->click();
+            deleteSelectedROM();
+        }
+
+        if (input.isKeyPressed(SDLK_r) || input.isGamepadButtonPressed(SDL_CONTROLLER_BUTTON_START)) {
+            btnRescan->click();
+            if (!usbCheckInProgress) {
+                checkAndCopyUSBROMs(nullptr);
+            }
         }
     }
 }
@@ -952,7 +969,7 @@ void MenuScreen::checkAndCopyUSBROMs(SDL_Renderer* renderer) {
                         extension == ".gba" || extension == ".gb" || extension == ".gbc") {
                         
                         std::cout << "  Encontrado: " << entry.path().filename().string() << std::endl;
-                        copyROMFromUSBToLocal(renderer, filepath);
+                       // copyROMFromUSBToLocal(renderer, filepath);
                         copiedCount++;
                     }
                 }
@@ -963,7 +980,7 @@ void MenuScreen::checkAndCopyUSBROMs(SDL_Renderer* renderer) {
     }
 
     if (copiedCount > 0) {
-        setStatusMessage("Procesadas " + std::to_string(copiedCount) + " ROMs", 3.0f);
+        setStatusMessage("Detectados " + std::to_string(copiedCount) + " ROMs", 3.0f);
         updateDisplayedROMs();
     } else {
         setStatusMessage("No se encontraron ROMs nuevas", 2.0f);

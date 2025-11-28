@@ -1,24 +1,21 @@
 #!/bin/bash
 
-# Esperamos un poco al arrancar para no estorbar el inicio
-sleep 5
+LOG="/tmp/wd.log"
+echo "Iniciando vigilancia..." > $LOG
 
 while true; do
-    # Verificamos si la carpeta usb_drive es un punto de montaje activo
     if mountpoint -q /media/usb_drive; then
 
-        # Si hay USB y Mednafen está corriendo...
-        if pgrep -x "mednafen" > /dev/null; then
+        if pgrep -f "mednafen" > /dev/null; then
 
-            # Matamos el juego
-            killall -9 mednafen
+            echo "Alerta: USB conectada durante juego. Matando..." >> $LOG
+            pkill -9 -f "mednafen"
 
-            # ¡IMPORTANTE! Esperamos a que realmente muera antes de seguir
-            # Esto evita que el script se vuelva loco matando mil veces por segundo
-            # y bloquee tu control.
-            while pgrep -x "mednafen" > /dev/null; do sleep 1; done
+            while pgrep -f "mednafen" > /dev/null; do 
+                sleep 0.1
+            done
+            echo "Juego terminado." >> $LOG
         fi
     fi
-    # Revisar cada segundo
     sleep 1
 done
